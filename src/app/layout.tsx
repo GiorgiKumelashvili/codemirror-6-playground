@@ -3,10 +3,10 @@ import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { Inter as FontSans } from 'next/font/google';
 import { AppLayout } from '@/components/app/app-layout';
+import CustomThemeProvider from '@/components/theme/custom-theme-provider';
 
 import '../styles/globals.css';
 import '../styles/theme.css';
-import CustomThemeProvider from '@/components/theme/custom-theme-provider';
 
 const ThemeProvider = dynamic(() => import('../components/theme-provider'), { ssr: false });
 

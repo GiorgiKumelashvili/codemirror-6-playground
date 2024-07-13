@@ -1,5 +1,11 @@
 import { EditorLayoutLinks } from '@/components/app/editor-layout-links';
 
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Editor',
+};
+
 export default async function EditorLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div>
