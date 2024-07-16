@@ -9,6 +9,7 @@ export const constants = {
       hook: '/editor/hook',
       markdown: '/editor/markdown',
       collab: '/editor/collab',
+      collabAdvanced: '/editor/collab-advanced',
     },
   },
 };

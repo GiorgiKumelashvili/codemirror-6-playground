@@ -9,6 +9,7 @@ import { Separator } from '@radix-ui/react-dropdown-menu';
 import {
   autoCompleteCompartment,
   autoCompleteExtension,
+  basicSetupOption,
   getAllExtension,
   getAllTheme,
 } from '@/app/editor/extensions';
@@ -53,6 +54,7 @@ export default function EditorToggleExtensionPage(): JSX.Element {
           height="600px"
           autoFocus
           spellCheck
+          basicSetup={basicSetupOption}
           readOnly={false}
           extensions={extensions}
           theme={(themes[theme as keyof typeof themes] || theme) as EditorTheme}

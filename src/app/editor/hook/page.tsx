@@ -3,7 +3,7 @@
 import * as themes from '@uiw/codemirror-themes-all';
 import { Extension, Text, useCodeMirror } from '@uiw/react-codemirror';
 import { useMemo, useRef, useState } from 'react';
-import { getAllExtension, getAllTheme } from '@/app/editor/extensions';
+import { basicSetupOption, getAllExtension, getAllTheme } from '@/app/editor/extensions';
 import { EditorTheme } from '@/lib/types';
 import { ChangeTheme } from '@/app/editor/components';
 
@@ -29,6 +29,7 @@ export default function EditorWithHookPage() {
     spellCheck: true,
     readOnly: false,
     extensions,
+    basicSetup: basicSetupOption,
     theme: (themes[theme as keyof typeof themes] || theme) as EditorTheme,
   });
 

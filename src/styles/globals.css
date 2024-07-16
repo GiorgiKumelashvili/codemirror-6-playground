@@ -148,3 +148,32 @@
   color: #ffffff !important;
   filter: brightness(85%);
 }
+
+/*! After this is for tooltip cursor */
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.cm-tooltip-cursor-indicator {
+  left: 13px;
+  height: 15px;
+  background: rgb(147, 147, 255);
+  width: 2px;
+  bottom: -22px;
+  position: absolute;
+  animation: blink 1s infinite;
+}
+
+/* Override */
+.cm-scroller {
+  padding: 10px !important;
+}

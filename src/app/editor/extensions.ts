@@ -7,6 +7,7 @@ import {
 } from '@codemirror/autocomplete';
 import {
   basicSetup,
+  BasicSetupOptions,
   Compartment,
   EditorView,
   hoverTooltip,
@@ -142,15 +143,16 @@ export const highestPredesenceKeymapExtensions = Prec.highest(
 );
 
 export const indentUnitExtension = indentUnit.of('\t');
-export const basicSetupExtension = basicSetup({
-  foldGutter: true,
+export const basicSetupOption: BasicSetupOptions = {
+  lineNumbers: false,
+  foldGutter: false,
   allowMultipleSelections: true,
   highlightActiveLine: true,
-  lineNumbers: true,
   defaultKeymap: true,
   autocompletion: true,
   completionKeymap: true,
-});
+  bracketMatching: true,
+};
 
 export const wordHoverExtension = hoverTooltip((view, pos, side) => {
   let { from, to, text } = view.state.doc.lineAt(pos);
@@ -203,7 +205,6 @@ export const getAllTheme = () => {
 };
 export const getAllExtension = () => {
   return [
-    basicSetupExtension,
     wordHoverExtension,
     highestPredesenceKeymapExtensions,
 

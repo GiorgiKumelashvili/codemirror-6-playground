@@ -53,6 +53,11 @@ export const EditorLayoutLinks = () => {
       href: constants.path.editor.collab,
       isActive: pathName === constants.path.editor.collab,
     },
+    {
+      text: 'Collab Advanced',
+      href: constants.path.editor.collabAdvanced,
+      isActive: pathName === constants.path.editor.collabAdvanced,
+    },
   ];
 
   return (
