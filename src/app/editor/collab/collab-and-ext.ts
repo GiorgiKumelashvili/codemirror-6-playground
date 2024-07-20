@@ -1,5 +1,5 @@
-import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
-import { Text, ChangeSet } from '@codemirror/state';
+// import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
+// import { Text, ChangeSet } from '@codemirror/state';
 import {
   Update,
   receiveUpdates,
@@ -8,6 +8,7 @@ import {
   getSyncedVersion,
 } from '@codemirror/collab';
 import { Socket } from 'socket.io-client';
+import { ChangeSet, EditorView, ViewPlugin, ViewUpdate, Text } from '@uiw/react-codemirror';
 
 function pushUpdates(
   socket: Socket,

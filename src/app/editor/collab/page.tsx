@@ -14,13 +14,16 @@ import { getDocument, peerExtension } from '@/app/editor/collab/collab-and-ext';
  */
 export default function EditorCollabPage(): JSX.Element {
   const [theme, setTheme] = useState<EditorTheme>('dark');
-
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState('N/A');
   const [version, setVersion] = useState<number>();
   const [doc, setDoc] = useState<Text>();
 
   const themeOptions = useMemo(() => getAllTheme(), []);
+  const activeTheme = useMemo(
+    () => (themes[theme as keyof typeof themes] || theme) as EditorTheme,
+    [theme]
+  );
   const extensions: Extension[] = useMemo(() => {
     const tempExtensions = getAllExtension();
 
@@ -87,7 +90,7 @@ export default function EditorCollabPage(): JSX.Element {
             spellCheck
             readOnly={false}
             extensions={extensions}
-            theme={(themes[theme as keyof typeof themes] || theme) as EditorTheme}
+            theme={activeTheme}
           />
         ) : (
           <p>...loading</p>

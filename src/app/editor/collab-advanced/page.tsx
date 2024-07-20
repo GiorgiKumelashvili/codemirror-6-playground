@@ -1,215 +1,155 @@
 'use client';
 
 import * as themes from '@uiw/codemirror-themes-all';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { basicSetupOption, getAllExtension, getAllTheme } from '@/app/editor/extensions';
 import { EditorTheme } from '@/lib/types';
 import { markdown } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 import { ChangeTheme } from '@/app/editor/components';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { tempTextMarkdown } from '@/app/editor/data';
+import { getRandomInt } from '@/lib/utils';
+import { v4 as uuid } from 'uuid';
 import CodeMirror, {
-  Decoration,
-  DecorationSet,
+  BlockInfo,
+  EditorState,
   EditorView,
   Extension,
-  Facet,
-  Range,
-  RangeSet,
-  Text,
-  ViewPlugin,
-  ViewUpdate,
-  WidgetType,
+  Rect,
 } from '@uiw/react-codemirror';
-import { Button } from '@/components/ui/button';
-import { EventBus } from '@/app/editor/collab-advanced/event-bus';
-import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
-const eventBus = new EventBus();
+type CursorData = {
+  color: string;
+  text: string;
+  id: string;
+  pos: number;
+};
 
-//! resource - https://github.dev/yjs/y-codemirror.next
-
-const caretBaseTheme = EditorView.baseTheme({
-  '& .cm-x-cursor-line': {
-    position: 'relative',
-    'border-left': '1px solid',
-    'border-right': '1px solid',
-    'margin-left': '-1px',
-    'margin-right': '-1px',
-    'box-sizing': 'border-box',
-    display: 'inline',
-  },
-
-  '& .cm-x-cursor-head': {
-    'border-radius': '50%',
-    position: 'absolute',
-    width: '.4em',
-    height: '.4em',
-    top: '-.2em',
-    left: '-.2em',
-    'background-color': 'inherit',
-    transition: 'transform .3s ease-in-out',
-    'box-sizing': 'border-box',
-  },
-
-  '& .cm-x-cursor-name-container': {
-    'font-size': '10px',
-    position: 'absolute',
-    width: 'fit-content',
-    background: 'red',
-    left: '5px',
-    right: '0px',
-    top: '-13px',
-    margin: 'auto',
-    'z-index': '10',
-    color: 'white',
-    padding: '0 5px',
-    'border-radius': '8px 10px 10px 0',
-  },
-});
-
-class CaretWidget extends WidgetType {
-  private color: string;
-  private name: string;
-
-  constructor(color: string, name: string) {
-    super();
-    this.color = color;
-    this.name = name;
-  }
-
-  toDOM(_view: EditorView): HTMLElement {
-    const span = document.createElement('span');
-    span.className = 'cm-x-cursor-line';
-    span.style.backgroundColor = this.color;
-    span.style.borderColor = this.color;
-
-    const dot = document.createElement('div');
-    dot.className = 'cm-x-cursor-head';
-    span.appendChild(dot);
-
-    const nameContainer = document.createElement('div');
-    nameContainer.className = 'cm-x-cursor-name-container';
-    nameContainer.style.backgroundColor = this.color;
-    nameContainer.textContent = this.name;
-    span.appendChild(nameContainer);
-
-    return span;
-  }
-
-  eq(widget: CaretWidget): boolean {
-    return widget.color === this.color;
-  }
-
-  compare(widget: CaretWidget): boolean {
-    return widget.color === this.color;
-  }
-
-  updateDOM() {
-    return false;
-  }
-
-  get estimatedHeight() {
-    return -1;
-  }
-
-  ignoreEvent() {
-    return true;
-  }
-}
-
-const caretPlugin = ViewPlugin.fromClass(
-  class {
-    decorations: DecorationSet;
-
-    constructor(view: EditorView) {
-      this.decorations = RangeSet.of([]);
-
-      eventBus.subscribe('test', (obj: { decorations: Range<Decoration>[] }) => {
-        this.decorations = Decoration.set(obj.decorations);
-
-        // update view
-        view.dispatch();
-      });
-      eventBus.subscribe('clear', () => {
-        this.decorations = Decoration.set([]);
-
-        // update view
-        view.dispatch();
-      });
-    }
-
-    update(_view: ViewUpdate) {}
-  },
-  { decorations: v => v.decorations }
-);
-
-const caretExtension = [caretPlugin, caretBaseTheme];
-
-function randomInRange(start: number, end: number) {
-  return Math.floor(Math.random() * (end - start + 1) + start);
-}
+const arrOfCursors: CursorData[] = [
+  { color: '#ff0012', text: 'Giorgi', id: uuid(), pos: 12 },
+  { color: '#ADFA1B', text: 'Gela', id: uuid(), pos: 20 },
+];
 
 export default function EditorMarkdown(): JSX.Element {
+  const editor = useRef<{ view: EditorView; state: EditorState }>(null);
   const [theme, setTheme] = useState<EditorTheme>('dark');
-  const editor = useRef<{ view: EditorView }>(null);
-  const [number, setNumber] = useState<number | null>(null);
+  const [maxForRand, setMaxForRand] = useState<number | null>(null);
 
   const themeOptions = useMemo(() => getAllTheme(), []);
   const extensions: Extension[] = useMemo(
     () => getAllExtension().concat(markdown({ codeLanguages: languages })),
     []
   );
+  const activeTheme = useMemo(
+    () => (themes[theme as keyof typeof themes] || theme) as EditorTheme,
+    [theme]
+  );
 
   const test = () => {
-    const num = number ?? randomInRange(1, 5);
+    const editorDom = document.querySelector('.cm-editor');
 
-    eventBus.publish('test', {
-      decorations: [
-        {
-          from: num,
-          to: num,
-          value: Decoration.widget({
-            side: -1,
-            block: false,
-            widget: new CaretWidget('#ff0012', 'hello'),
-          }),
-        },
-      ] as Range<Decoration>[],
-    });
+    if (!editorDom) {
+      console.log('no editor element');
+      return;
+    }
+
+    for (const cursor of arrOfCursors) {
+      const randomNumber = maxForRand ? getRandomInt(0, maxForRand) : null;
+
+      const { left, lineHeight, top } = calculateCords({
+        characterPosition: randomNumber ?? cursor.pos, // randomnumber is for testing
+        editorDom,
+      });
+
+      document.getElementById(cursor.id)?.remove();
+
+      renderCursor({ lineHeight, left, top, ...cursor });
+    }
   };
 
-  const clear = () => {
-    eventBus.publish('clear');
-  };
+  const calculateCords = useCallback((props: { characterPosition: number; editorDom: Element }) => {
+    const { characterPosition, editorDom } = props;
+
+    // Get coordinates for left position calculation, this gives positions for
+    const cords = editor.current?.view.coordsAtPos(characterPosition) as Rect;
+    const cordsBlock = editor.current?.view.lineBlockAt(characterPosition) as BlockInfo;
+    const defaultLineHeight = editor.current?.view.defaultLineHeight as number;
+
+    // How much is root editor dom from left and top
+    const rootEditorDistanceFromLeft = editorDom.getBoundingClientRect().left + window.scrollX; // px
+    const currentLineAbsPosFromEditorLeft = cords.left - rootEditorDistanceFromLeft;
+
+    return {
+      left: currentLineAbsPosFromEditorLeft,
+      top: cordsBlock.top,
+      lineHeight: defaultLineHeight,
+    };
+  }, []);
+
+  const renderCursor = useCallback(
+    (props: { left: number; top: number; lineHeight: number } & CursorData) => {
+      const { left, top, lineHeight, color, text, id } = props;
+
+      const span = document.createElement('span');
+      span.className = 'cm-x-cursor-line';
+      span.style.left = `${left}px`;
+      span.style.top = `${top}px`;
+      span.style.borderLeft = `1px solid ${color}`;
+      span.style.borderRight = `1px solid ${color}`;
+      span.style.height = lineHeight + 'px';
+      span.id = id;
+
+      const dot = document.createElement('div');
+      dot.className = 'cm-x-cursor-head';
+      dot.style.backgroundColor = color;
+      span.appendChild(dot);
+
+      const nameContainer = document.createElement('div');
+      nameContainer.className = 'cm-x-cursor-name-container';
+      nameContainer.style.backgroundColor = color;
+      nameContainer.textContent = text;
+      span.appendChild(nameContainer);
+
+      document.querySelector('.cm-editor')?.appendChild(span);
+    },
+    []
+  );
 
   return (
     <>
       <div className="mb-5 flex gap-2">
         <ChangeTheme theme={theme} setTheme={setTheme} themeOptions={themeOptions} />
-
-        <Button onClick={test}>test</Button>
-        <Input className="w-56" onChange={e => setNumber(Number(e.target.value))} />
-        <Button onClick={clear}>clear</Button>
+        <Button onClick={test}>Test</Button>
+        <Input
+          placeholder="Enter max number for random"
+          className="w-64"
+          onChange={e => setMaxForRand(Number(e.target.value))}
+          value={maxForRand?.toString() ?? ''}
+        />
       </div>
 
-      <div className="max-w-[850px]">
+      <div className="flex">
         <CodeMirror
           ref={editor}
-          value={Text.of([
-            'Hello'.repeat(25),
-            'Hello'.repeat(25),
-            '',
-            "\n\n```javascript\nlet x = 'y'\n```",
-            ...Array.from({ length: 200 }, (_, i) => 'i + 1'),
-          ]).toString()}
+          value={tempTextMarkdown}
           height="600px"
+          width="750px"
+          className="cm-custom"
           autoFocus
           spellCheck
           readOnly={false}
           basicSetup={basicSetupOption}
-          extensions={extensions.concat(caretExtension)}
-          theme={(themes[theme as keyof typeof themes] || theme) as EditorTheme}
+          extensions={extensions}
+          theme={activeTheme}
         />
+        <Card className="p-4 mx-4 rounded-none border-none flex-1">
+          <h1 className="font-bold">Example data rendering on the page</h1>
+          <br />
+          <pre className="text-xs">{JSON.stringify(arrOfCursors, null, 2)}</pre>
+        </Card>
       </div>
     </>
   );

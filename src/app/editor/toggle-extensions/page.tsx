@@ -13,6 +13,7 @@ import {
   getAllExtension,
   getAllTheme,
 } from '@/app/editor/extensions';
+import { tempText } from '@/app/editor/data';
 
 export default function EditorToggleExtensionPage(): JSX.Element {
   const editor = useRef<{ view: EditorView }>(null);
@@ -20,8 +21,12 @@ export default function EditorToggleExtensionPage(): JSX.Element {
   const [theme, setTheme] = useState<EditorTheme>('dark');
   const [isAutocompleteActive, setIsAutocompleteActive] = useState(true);
 
-  const themeOptions = useMemo(() => getAllTheme(), []);
   const extensions: Extension[] = useMemo(() => getAllExtension(), []);
+  const themeOptions = useMemo(() => getAllTheme(), []);
+  const activeTheme = useMemo(
+    () => (themes[theme as keyof typeof themes] || theme) as EditorTheme,
+    [theme]
+  );
 
   //! This is how to activate extension without rerendering component
   useEffect(() => {
@@ -50,14 +55,14 @@ export default function EditorToggleExtensionPage(): JSX.Element {
       <div className="max-w-[850px]">
         <CodeMirror
           ref={editor}
-          value={Text.of(['Hello']).toString()}
+          value={tempText}
           height="600px"
           autoFocus
           spellCheck
           basicSetup={basicSetupOption}
           readOnly={false}
           extensions={extensions}
-          theme={(themes[theme as keyof typeof themes] || theme) as EditorTheme}
+          theme={activeTheme}
         />
       </div>
     </>

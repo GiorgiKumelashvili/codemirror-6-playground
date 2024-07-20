@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from 'react';
 import { basicSetupOption, getAllExtension, getAllTheme } from '@/app/editor/extensions';
 import { EditorTheme } from '@/lib/types';
 import { ChangeTheme } from '@/app/editor/components';
+import { tempText } from '@/app/editor/data';
 
 export default function EditorWithHookPage() {
   const editor = useRef<HTMLDivElement>(null);
@@ -13,6 +14,10 @@ export default function EditorWithHookPage() {
 
   const themeOptions = useMemo(() => getAllTheme(), []);
   const extensions: Extension[] = useMemo(() => getAllExtension(), []);
+  const activeTheme = useMemo(
+    () => (themes[theme as keyof typeof themes] || theme) as EditorTheme,
+    [theme]
+  );
 
   const {
     view: _view,
@@ -23,14 +28,14 @@ export default function EditorWithHookPage() {
     state: _state,
   } = useCodeMirror({
     container: editor.current,
-    value: Text.of(['Hello']).toString(),
+    value: tempText,
     height: '600px',
     autoFocus: true,
     spellCheck: true,
     readOnly: false,
     extensions,
     basicSetup: basicSetupOption,
-    theme: (themes[theme as keyof typeof themes] || theme) as EditorTheme,
+    theme: activeTheme,
   });
 
   return (

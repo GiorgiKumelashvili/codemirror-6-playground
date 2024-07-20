@@ -17,6 +17,10 @@ export default function EditorMarkdown(): JSX.Element {
     () => getAllExtension().concat(markdown({ codeLanguages: languages })),
     []
   );
+  const activeTheme = useMemo(
+    () => (themes[theme as keyof typeof themes] || theme) as EditorTheme,
+    [theme]
+  );
 
   return (
     <>
@@ -33,7 +37,7 @@ export default function EditorMarkdown(): JSX.Element {
           readOnly={false}
           basicSetup={basicSetupOption}
           extensions={extensions}
-          theme={(themes[theme as keyof typeof themes] || theme) as EditorTheme}
+          theme={activeTheme}
         />
       </div>
     </>

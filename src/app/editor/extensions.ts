@@ -207,6 +207,7 @@ export const getAllExtension = () => {
   return [
     wordHoverExtension,
     highestPredesenceKeymapExtensions,
+    EditorView.lineWrapping,
 
     //! this is needed for extension toggle to work, see in toggle-extensions folder
     autoCompleteCompartment.of(autoCompleteExtension),
