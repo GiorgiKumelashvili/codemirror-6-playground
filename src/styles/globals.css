@@ -204,3 +204,23 @@
   padding: 0 5px;
   border-radius: 8px 10px 10px 0;
 }
+
+/* ! Very important overrides for codemirror */
+.cm-custom {
+  font-size: 16px;
+}
+
+/* .cm-custom .cm-editor { */
+.cm-custom .cm-scroller {
+  min-height: 100%;
+  font-family: inherit;
+  padding: 30px;
+}
+
+.cm-custom .cm-line {
+  padding: 0 2px;
+}
+
+.cm-custom .cm-gutterElement {
+  padding: 0 13px 0 5px !important;
+}

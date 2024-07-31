@@ -30,7 +30,7 @@ type CursorData = {
 
 const arrOfCursors: CursorData[] = [
   { color: '#ff0012', text: 'Giorgi', id: uuid(), pos: 12 },
-  { color: '#ADFA1B', text: 'Gela', id: uuid(), pos: 20 },
+  { color: '#ADFA1B', text: 'Gela', id: uuid(), pos: 85 }, //TODO: issue with 86 when there is line break
 ];
 
 export default function EditorMarkdown(): JSX.Element {
@@ -91,7 +91,10 @@ export default function EditorMarkdown(): JSX.Element {
 
   const renderCursor = useCallback(
     (props: { left: number; top: number; lineHeight: number } & CursorData) => {
-      const { left, top, lineHeight, color, text, id } = props;
+      const { left, lineHeight, color, text, id } = props;
+      let { top } = props;
+
+      top = top + 30;
 
       const span = document.createElement('span');
       span.className = 'cm-x-cursor-line';
@@ -113,7 +116,9 @@ export default function EditorMarkdown(): JSX.Element {
       nameContainer.textContent = text;
       span.appendChild(nameContainer);
 
-      document.querySelector('.cm-editor')?.appendChild(span);
+      //! Must be scroller in order for positions to work accordingly if for example you use in
+      //! cm-editor instead of cm-scroller then cursor div will not respect scrolling and stay in one place fixed on screen
+      document.querySelector('.cm-scroller')?.appendChild(span);
     },
     []
   );
