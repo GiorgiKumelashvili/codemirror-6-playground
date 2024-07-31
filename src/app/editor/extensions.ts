@@ -148,6 +148,7 @@ export const basicSetupOption: BasicSetupOptions = {
   foldGutter: false,
   allowMultipleSelections: true,
   highlightActiveLine: true,
+  highlightActiveLineGutter: false,
   defaultKeymap: true,
   autocompletion: true,
   completionKeymap: true,

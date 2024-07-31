@@ -8,8 +8,9 @@ export const tempText = Text.of([
 ]).toString();
 
 export const tempTextMarkdown = Text.of([
-  'Hello'.repeat(25),
-  'Hello'.repeat(25),
+  'HelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHell9oHelloHelloHelloHelloHelloHelloHelloHelloHello1',
+  'Hello'.repeat(25) + 2,
+  'Hello'.repeat(25) + 3,
   '',
   "\n\n```javascript\nlet x = 'y'\n```",
   ...Array.from({ length: 200 }, (_, i) => `i + ${i}`),

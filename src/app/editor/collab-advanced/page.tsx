@@ -30,8 +30,10 @@ type CursorData = {
 
 const arrOfCursors: CursorData[] = [
   { color: '#ff0012', text: 'Giorgi', id: uuid(), pos: 12 },
-  { color: '#ADFA1B', text: 'Gela', id: uuid(), pos: 85 }, //TODO: issue with 86 when there is line break
+  { color: '#ADFA1B', text: 'Gela', id: uuid(), pos: 80 },
 ];
+
+const DEFAULT_PADDING = 30;
 
 export default function EditorMarkdown(): JSX.Element {
   const editor = useRef<{ view: EditorView; state: EditorState }>(null);
@@ -50,8 +52,9 @@ export default function EditorMarkdown(): JSX.Element {
 
   const test = () => {
     const editorDom = document.querySelector('.cm-editor');
+    const contentDom = document.querySelector('.cm-content');
 
-    if (!editorDom) {
+    if (!editorDom || !contentDom) {
       console.log('no editor element');
       return;
     }
@@ -62,6 +65,7 @@ export default function EditorMarkdown(): JSX.Element {
       const { left, lineHeight, top } = calculateCords({
         characterPosition: randomNumber ?? cursor.pos, // randomnumber is for testing
         editorDom,
+        contentDom,
       });
 
       document.getElementById(cursor.id)?.remove();
@@ -70,31 +74,33 @@ export default function EditorMarkdown(): JSX.Element {
     }
   };
 
-  const calculateCords = useCallback((props: { characterPosition: number; editorDom: Element }) => {
-    const { characterPosition, editorDom } = props;
+  const calculateCords = useCallback(
+    (props: { characterPosition: number; editorDom: Element; contentDom: Element }) => {
+      const { characterPosition, editorDom, contentDom } = props;
 
-    // Get coordinates for left position calculation, this gives positions for
-    const cords = editor.current?.view.coordsAtPos(characterPosition) as Rect;
-    const cordsBlock = editor.current?.view.lineBlockAt(characterPosition) as BlockInfo;
-    const defaultLineHeight = editor.current?.view.defaultLineHeight as number;
+      // Get coordinates for left position calculation, this gives positions for
+      const cords = editor.current?.view.coordsAtPos(characterPosition) as Rect;
 
-    // How much is root editor dom from left and top
-    const rootEditorDistanceFromLeft = editorDom.getBoundingClientRect().left + window.scrollX; // px
-    const currentLineAbsPosFromEditorLeft = cords.left - rootEditorDistanceFromLeft;
+      const defaultLineHeight = Math.round(editor.current?.view.defaultLineHeight as number);
 
-    return {
-      left: currentLineAbsPosFromEditorLeft,
-      top: cordsBlock.top,
-      lineHeight: defaultLineHeight,
-    };
-  }, []);
+      // How much is root editor dom from left and top (that is why we substract from cords.left and cords.top)
+      // ContentDom is necessary because hovering vertically is enabled and dom may get out of bounds
+      const currentLineAbsPosFromEditorLeft = cords.left - editorDom.getBoundingClientRect().left;
+      const currentLineAbsPosFromEditorTop =
+        cords.top - contentDom.getBoundingClientRect().top + DEFAULT_PADDING;
+
+      return {
+        left: currentLineAbsPosFromEditorLeft,
+        top: currentLineAbsPosFromEditorTop,
+        lineHeight: defaultLineHeight,
+      };
+    },
+    []
+  );
 
   const renderCursor = useCallback(
     (props: { left: number; top: number; lineHeight: number } & CursorData) => {
-      const { left, lineHeight, color, text, id } = props;
-      let { top } = props;
-
-      top = top + 30;
+      const { left, lineHeight, color, text, id, top } = props;
 
       const span = document.createElement('span');
       span.className = 'cm-x-cursor-line';
@@ -146,7 +152,7 @@ export default function EditorMarkdown(): JSX.Element {
           autoFocus
           spellCheck
           readOnly={false}
-          basicSetup={basicSetupOption}
+          basicSetup={{ ...basicSetupOption, lineNumbers: true }}
           extensions={extensions}
           theme={activeTheme}
         />
