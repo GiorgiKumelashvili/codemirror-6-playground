@@ -193,9 +193,15 @@
 }
 
 .cm-custom .cm-x-cursor-name-container {
+  width: fit-content;
+  max-width: 40px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   font-size: 12px;
   position: absolute;
-  width: fit-content;
   background: red;
   left: 5px;
   right: 0px;
@@ -210,15 +216,15 @@
   font-size: 16px;
 }
 
-/* .cm-custom .cm-editor { */
 .cm-custom .cm-scroller {
   min-height: 100%;
   font-family: inherit;
-  padding: 30px;
+  padding: 40px; /* can be modified */
+  overflow-x: hidden;
 }
 
 .cm-custom .cm-line {
-  padding: 0 2px;
+  padding: 0;
 }
 
 .cm-custom .cm-gutterElement {

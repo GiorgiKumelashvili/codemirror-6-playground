@@ -29,11 +29,12 @@ type CursorData = {
 };
 
 const arrOfCursors: CursorData[] = [
-  { color: '#ff0012', text: 'Giorgi', id: uuid(), pos: 12 },
-  { color: '#ADFA1B', text: 'Gela', id: uuid(), pos: 80 },
+  { color: '#009c2f', text: 'Gela', id: uuid(), pos: 12 },
+  { color: '#009c2f', text: 'Gelaasdasdasdasd', id: uuid(), pos: 78 },
 ];
 
-const DEFAULT_PADDING = 30;
+const DEFAULT_PADDING = 40; // can be modified
+const IMPORTANT_SIDE = -1;
 
 export default function EditorMarkdown(): JSX.Element {
   const editor = useRef<{ view: EditorView; state: EditorState }>(null);
@@ -79,7 +80,7 @@ export default function EditorMarkdown(): JSX.Element {
       const { characterPosition, editorDom, contentDom } = props;
 
       // Get coordinates for left position calculation, this gives positions for
-      const cords = editor.current?.view.coordsAtPos(characterPosition) as Rect;
+      const cords = editor.current?.view.coordsAtPos(characterPosition, IMPORTANT_SIDE) as Rect;
 
       const defaultLineHeight = Math.round(editor.current?.view.defaultLineHeight as number);
 
