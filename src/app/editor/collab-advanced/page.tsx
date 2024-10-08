@@ -1,25 +1,29 @@
-'use client';
+"use client";
 
-import * as themes from '@uiw/codemirror-themes-all';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { basicSetupOption, getAllExtension, getAllTheme } from '@/app/editor/extensions';
-import { EditorTheme } from '@/lib/types';
-import { markdown } from '@codemirror/lang-markdown';
-import { languages } from '@codemirror/language-data';
-import { ChangeTheme } from '@/app/editor/components';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { tempTextMarkdown } from '@/app/editor/data';
-import { getRandomInt } from '@/lib/utils';
-import { v4 as uuid } from 'uuid';
+import * as themes from "@uiw/codemirror-themes-all";
+import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  basicSetupOption,
+  getAllExtension,
+  getAllTheme,
+} from "@/app/editor/extensions";
+import { EditorTheme } from "@/lib/types";
+import { markdown } from "@codemirror/lang-markdown";
+import { languages } from "@codemirror/language-data";
+import { ChangeTheme } from "@/app/editor/components";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { tempTextMarkdown } from "@/app/editor/data";
+import { getRandomInt } from "@/lib/utils";
+import { v4 as uuid } from "uuid";
 import CodeMirror, {
   BlockInfo,
   EditorState,
   EditorView,
   Extension,
   Rect,
-} from '@uiw/react-codemirror';
-import { Card } from '@/components/ui/card';
+} from "@uiw/react-codemirror";
+import { Card } from "@/components/ui/card";
 
 type CursorData = {
   color: string;
@@ -29,8 +33,8 @@ type CursorData = {
 };
 
 const arrOfCursors: CursorData[] = [
-  { color: '#009c2f', text: 'Gela', id: uuid(), pos: 12 },
-  { color: '#009c2f', text: 'Gelaasdasdasdasd', id: uuid(), pos: 78 },
+  { color: "#009c2f", text: "Gela", id: uuid(), pos: 12 },
+  { color: "#009c2f", text: "Gelaasdasdasdasd", id: uuid(), pos: 78 },
 ];
 
 const DEFAULT_PADDING = 40; // can be modified
@@ -38,7 +42,7 @@ const IMPORTANT_SIDE = -1;
 
 export default function EditorMarkdown(): JSX.Element {
   const editor = useRef<{ view: EditorView; state: EditorState }>(null);
-  const [theme, setTheme] = useState<EditorTheme>('dark');
+  const [theme, setTheme] = useState<EditorTheme>("dark");
   const [maxForRand, setMaxForRand] = useState<number | null>(null);
   const themeOptions = useMemo(() => getAllTheme(), []);
   const extensions: Extension[] = useMemo(
@@ -50,12 +54,41 @@ export default function EditorMarkdown(): JSX.Element {
     [theme]
   );
 
-  const test = () => {
-    const editorDom = document.querySelector('.cm-editor');
-    const contentDom = document.querySelector('.cm-content');
+  const testFromInput = () => {
+    const editorDom = document.querySelector(".cm-editor");
+    const contentDom = document.querySelector(".cm-content");
 
     if (!editorDom || !contentDom) {
-      console.log('no editor element');
+      console.log("no editor element");
+      return;
+    }
+
+    if (!maxForRand) {
+      alert("no maxForRand");
+      return;
+    }
+
+    const cursor = arrOfCursors[0];
+
+    // const randomNumber = maxForRand ? getRandomInt(0, maxForRand) : null;
+
+    const { left, lineHeight, top } = calculateCords({
+      characterPosition: maxForRand,
+      editorDom,
+      contentDom,
+    });
+
+    document.getElementById(cursor.id)?.remove();
+
+    renderCursor({ lineHeight, left, top, ...cursor });
+  };
+
+  const test = () => {
+    const editorDom = document.querySelector(".cm-editor");
+    const contentDom = document.querySelector(".cm-content");
+
+    if (!editorDom || !contentDom) {
+      console.log("no editor element");
       return;
     }
 
@@ -75,17 +108,27 @@ export default function EditorMarkdown(): JSX.Element {
   };
 
   const calculateCords = useCallback(
-    (props: { characterPosition: number; editorDom: Element; contentDom: Element }) => {
+    (props: {
+      characterPosition: number;
+      editorDom: Element;
+      contentDom: Element;
+    }) => {
       const { characterPosition, editorDom, contentDom } = props;
 
       // Get coordinates for left position calculation, this gives positions for
-      const cords = editor.current?.view.coordsAtPos(characterPosition, IMPORTANT_SIDE) as Rect;
+      const cords = editor.current?.view.coordsAtPos(
+        characterPosition,
+        IMPORTANT_SIDE
+      ) as Rect;
 
-      const defaultLineHeight = Math.round(editor.current?.view.defaultLineHeight as number);
+      const defaultLineHeight = Math.round(
+        editor.current?.view.defaultLineHeight as number
+      );
 
       // How much is root editor dom from left and top (that is why we substract from cords.left and cords.top)
       // ContentDom is necessary because hovering vertically is enabled and dom may get out of bounds
-      const currentLineAbsPosFromEditorLeft = cords.left - editorDom.getBoundingClientRect().left;
+      const currentLineAbsPosFromEditorLeft =
+        cords.left - editorDom.getBoundingClientRect().left;
       const currentLineAbsPosFromEditorTop =
         cords.top - contentDom.getBoundingClientRect().top + DEFAULT_PADDING;
 
@@ -102,29 +145,29 @@ export default function EditorMarkdown(): JSX.Element {
     (props: { left: number; top: number; lineHeight: number } & CursorData) => {
       const { left, lineHeight, color, text, id, top } = props;
 
-      const span = document.createElement('span');
-      span.className = 'cm-x-cursor-line';
+      const span = document.createElement("span");
+      span.className = "cm-x-cursor-line";
       span.style.left = `${left}px`;
       span.style.top = `${top}px`;
       span.style.borderLeft = `1px solid ${color}`;
       span.style.borderRight = `1px solid ${color}`;
-      span.style.height = lineHeight + 'px';
+      span.style.height = lineHeight + "px";
       span.id = id;
 
-      const dot = document.createElement('div');
-      dot.className = 'cm-x-cursor-head';
+      const dot = document.createElement("div");
+      dot.className = "cm-x-cursor-head";
       dot.style.backgroundColor = color;
       span.appendChild(dot);
 
-      const nameContainer = document.createElement('div');
-      nameContainer.className = 'cm-x-cursor-name-container';
+      const nameContainer = document.createElement("div");
+      nameContainer.className = "cm-x-cursor-name-container";
       nameContainer.style.backgroundColor = color;
       nameContainer.textContent = text;
       span.appendChild(nameContainer);
 
       //! Must be scroller in order for positions to work accordingly if for example you use in
       //! cm-editor instead of cm-scroller then cursor div will not respect scrolling and stay in one place fixed on screen
-      document.querySelector('.cm-scroller')?.appendChild(span);
+      document.querySelector(".cm-scroller")?.appendChild(span);
     },
     []
   );
@@ -132,13 +175,18 @@ export default function EditorMarkdown(): JSX.Element {
   return (
     <>
       <div className="mb-5 flex gap-2">
-        <ChangeTheme theme={theme} setTheme={setTheme} themeOptions={themeOptions} />
+        <ChangeTheme
+          theme={theme}
+          setTheme={setTheme}
+          themeOptions={themeOptions}
+        />
         <Button onClick={test}>Test</Button>
+        <Button onClick={testFromInput}>Test from input</Button>
         <Input
           placeholder="Enter max number for random"
           className="w-64"
-          onChange={e => setMaxForRand(Number(e.target.value))}
-          value={maxForRand?.toString() ?? ''}
+          onChange={(e) => setMaxForRand(Number(e.target.value))}
+          value={maxForRand?.toString() ?? ""}
         />
       </div>
 
