@@ -40,7 +40,6 @@ export default function EditorMarkdown(): JSX.Element {
   const editor = useRef<{ view: EditorView; state: EditorState }>(null);
   const [theme, setTheme] = useState<EditorTheme>('dark');
   const [maxForRand, setMaxForRand] = useState<number | null>(null);
-
   const themeOptions = useMemo(() => getAllTheme(), []);
   const extensions: Extension[] = useMemo(
     () => getAllExtension().concat(markdown({ codeLanguages: languages })),
